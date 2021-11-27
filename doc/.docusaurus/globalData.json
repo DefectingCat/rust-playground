@@ -1,0 +1,48 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/docs",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/docs",
+          "mainDocId": "intro",
+          "docs": [
+            {
+              "id": "Day 01/函数",
+              "path": "/docs/Day 01/函数",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "Day 01/基本概念",
+              "path": "/docs/Day 01/基本概念",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "Day 01/数据类型",
+              "path": "/docs/Day 01/数据类型",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "Day 02/所有权",
+              "path": "/docs/Day 02/所有权",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "Day 02/流程控制",
+              "path": "/docs/Day 02/流程控制",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "intro",
+              "path": "/docs/intro",
+              "sidebar": "tutorialSidebar"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

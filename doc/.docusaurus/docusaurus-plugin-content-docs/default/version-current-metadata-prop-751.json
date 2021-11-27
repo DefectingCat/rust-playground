@@ -1,0 +1,59 @@
+{
+  "pluginId": "default",
+  "version": "current",
+  "label": "Next",
+  "banner": null,
+  "badge": false,
+  "className": "docs-version-current",
+  "isLast": true,
+  "docsSidebars": {
+    "tutorialSidebar": [
+      {
+        "type": "link",
+        "label": "Rust notes",
+        "href": "/docs/intro"
+      },
+      {
+        "type": "category",
+        "label": "Day 01",
+        "collapsible": true,
+        "collapsed": true,
+        "items": [
+          {
+            "type": "link",
+            "label": "函数",
+            "href": "/docs/Day 01/函数"
+          },
+          {
+            "type": "link",
+            "label": "基本概念",
+            "href": "/docs/Day 01/基本概念"
+          },
+          {
+            "type": "link",
+            "label": "数据类型",
+            "href": "/docs/Day 01/数据类型"
+          }
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Day 02",
+        "collapsible": true,
+        "collapsed": true,
+        "items": [
+          {
+            "type": "link",
+            "label": "所有权",
+            "href": "/docs/Day 02/所有权"
+          },
+          {
+            "type": "link",
+            "label": "流程控制",
+            "href": "/docs/Day 02/流程控制"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "unversionedId": "Day 02/所有权",
+  "id": "Day 02/所有权",
+  "isDocsHomePage": false,
+  "title": "所有权",
+  "description": "所有权",
+  "source": "@site/docs/Day 02/所有权.md",
+  "sourceDirName": "Day 02",
+  "slug": "/Day 02/所有权",
+  "permalink": "/docs/Day 02/所有权",
+  "editUrl": "https://github.com/facebook/docusaurus/edit/main/website/docs/Day 02/所有权.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "数据类型",
+    "permalink": "/docs/Day 01/数据类型"
+  },
+  "next": {
+    "title": "流程控制",
+    "permalink": "/docs/Day 02/流程控制"
+  }
+}
