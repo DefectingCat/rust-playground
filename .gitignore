@@ -3,6 +3,7 @@ target
 *.pdb
 *.d
 node_modules
+**/src/main
 
 # Dependencies
 /node_modules
