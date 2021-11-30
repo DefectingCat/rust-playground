@@ -1,8 +1,9 @@
-target
 *.exe
 *.pdb
 node_modules
 **/src/main
+**/src/tempCodeRunnerFile
+**/target
 
 # Dependencies
 /node_modules
