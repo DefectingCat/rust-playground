@@ -24,6 +24,7 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 FROM nginx:alpine AS runner
 WORKDIR /app
 
+COPY --from=builder /app/nginx/conf.d/ /etc/nginx/conf.d/
 COPY --from=builder /app/build /usr/share/nginx/html
 
 EXPOSE 80
