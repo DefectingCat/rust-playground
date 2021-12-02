@@ -4,6 +4,7 @@ node_modules
 **/src/main
 **/src/tempCodeRunnerFile
 **/target
+**/src/lib
 
 # Dependencies
 /node_modules

@@ -1,12 +1,14 @@
 fn main() {
-    let mut name1 = Some(String::from("hello"));
-    modify_some(&mut name1);
-    println!("{:?}", name1);
+    let num: Option<i8> = Some(3);
+    let num2 = plus_one(num);
+
+    println!("num is {:?}", num);
+    println!("num2 is {:?}", num2);
 }
 
-fn modify_some(name: &mut Option<String>) {
-    match name {
+fn plus_one(num: Option<i8>) -> Option<i8> {
+    match num {
         None => None,
-        Some(value) => Some(*value = String::from("world")),
-    };
+        Some(value) => Some(value + 1),
+    }
 }
