@@ -129,3 +129,146 @@ pub fn notify<T: Summary>(item1: T, item2: T) {
 pub fn my_notify(item: impl Summary + Display) {
 pub fn my_notify<T: Summary + Display>(item: T) {
 ```
+
+### 通过 where 简化 trait bound
+
+然而，使用过多的 trait bound 也有缺点。每个泛型有其自己的 trait bound，所以有多个泛型参数的函数在名称和参数列表之间会有很长的 trait bound 信息，这使得函数签名难以阅读。为此，Rust 有另一个在函数签名之后的 `where` 从句中指定 trait bound 的语法。所以除了这么写：
+
+```rust
+fn some_function<T: Display + Clone, U: Clone + Debug>(t: T, u: U) -> i32 {}
+```
+
+还可以像这样使用 `where` 从句：
+
+```rust
+fn some_function<T, U>(t: T, u: U) -> i32
+where
+    T: Display + Clone,
+    U: Clone + Debug,
+{}
+```
+
+这个函数签名就显得不那么杂乱，函数名、参数列表和返回值类型都离得很近，看起来跟没有那么多 trait bounds 的函数很像。
+
+## 返回实现了 trait 的类型
+
+也可以在返回值中使用 `impl Trait` 语法，来返回实现了某个 trait 的类型：
+
+```rust
+fn returns_summarizes() -> impl Summary {
+    Tweet {
+        username: String::from("xfy"),
+        content: String::from("xfy!!!"),
+    }
+}
+```
+
+通过使用 `impl Summary` 作为返回值类型，我们指定了 `returns_summarizable` 函数返回某个实现了 `Summary` trait 的类型，但是不确定其具体的类型。
+
+返回一个只是指定了需要实现的 trait 的类型的能力在闭包和迭代器场景十分的有用。闭包和迭代器创建只有编译器知道的类型，或者是非常非常长的类型。`impl Trait` 允许你简单的指定函数返回一个 `Iterator` 而无需写出实际的冗长的类型。
+
+不过这只适用于返回单一类型的情况。例如，这段代码的返回值类型指定为返回 `impl Summary`，但是返回了 `NewsArticle` 或 `Tweet` 就行不通。
+
+## 使用 trait bounds 来修复 largest 函数
+
+之前的 `find_largest` 函数能够接受一个泛型，但是由于无法确定泛型 `T` 是否实现了 `std::cmp::PartialOrd` 的默认比较方法，所以无法运行。限制可以将泛型 `T` 标记为实现了 `PartialOrd` trait 的类型，这样就可以进行比较了。
+
+```rust
+fn find_largest<T: PartialOrd>(list: &[T]) -> &T {
+    let mut largest = &list[0];
+
+    for item in list {
+        if item > largest {
+            largest = item
+        }
+    }
+
+    largest
+}
+```
+
+这里将原返回值 `T` 修改为了 `&T`，因为使用了泛型版本的 `find_largest` 函数无法确定参数 `list` 是否实现了 `Copy` trait。所以这里将直接返回在 slice 中 `T` 值的引用。
+
+如果不想返回 `T` 值的引用的话，可以修改泛型为同时实现了 `Copy` 和 `PartialOrd` trait。
+
+```rust
+fn find_largest<T: PartialOrd + Copy>(list: &[T]) -> T {
+```
+
+但这样就会遇到另一个问题，在堆内存上的数据是没有实现 `Copy` trait 的，所以如果为了 `find_largest` 函数能够给堆内存数据使用的话，则需要同时在实现 `Clone` trait。并克隆 slice 的每一个值使得 `find_largest` 函数拥有其所有权。使用 `clone` 函数意味着对于类似 `String` 这样拥有堆上数据的类型，会潜在的分配更多堆上空间，而堆分配在涉及大量数据时可能会相当缓慢。
+
+所以返回在 slice 中 `T` 值的引用将不需要任何 `Clone` 或 `Copy` 的 trait bounds 而且也不会有任何的堆分配。
+
+```rust
+fn find_largest<T: PartialOrd>(list: &[T]) -> &T {
+    let mut largest = &list[0];
+
+    for item in list {
+        if item > largest {
+            largest = item
+        }
+    }
+
+    largest
+}
+
+fn main() {
+    let names = vec![
+        String::from("Hello3"),
+        String::from("Hello1"),
+        String::from("Hello2"),
+    ];
+
+    let largest = find_largest(&names);
+    println!("{}", largest)
+}
+```
+
+## 使用 trait bound 有条件地实现方法
+
+通过使用带有 trait bound 的泛型参数的 `impl` 块，可以有条件地只为那些实现了特定 trait 的类型实现方法。
+
+```rust
+use std::fmt::Display;
+
+struct Pair<T> {
+    x: T,
+    y: T,
+}
+
+impl<T> Pair<T> {
+    fn new(x: T, y: T) -> Self {
+        Self { x, y }
+    }
+}
+
+impl<T: Display + PartialOrd> Pair<T> {
+    fn cmp_display(&self) {
+        if self.x > self.y {
+            println!("The largest number is x = {}", self.x)
+        } else {
+            println!("The largest number is y = {}", self.y)
+        }
+    }
+}
+
+fn main() {
+    let my_pair = Pair::new(42, 33);
+
+    my_pair.cmp_display();
+}
+```
+
+类型 `Pair<T>` 总是实现了 `new` 方法，不过只有那些为 `T` 类型实现了 `PartialOrd` trait（来允许比较） 和 `Display` trait （来启用打印）的 `Pair<T>` 才会实现 `cmp_display` 方法
+
+也可以对任何实现了特定 trait 的类型有条件地实现 trait。对任何满足特定 trait bound 的类型实现 trait 被称为 _blanket implementations_，他们被广泛的用于 Rust 标准库中。
+
+trait 的类型实现了 `ToString` trait。这个 impl 块看起来像这样：
+
+```rust
+impl<T: Display> ToString for T {
+    // --snip--
+}
+```
+
+因为标准库有了这些 blanket implementation，我们可以对任何实现了 `Display` trait 的类型调用由 ToString 定义的 `to_string` 方法。
