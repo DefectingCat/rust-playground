@@ -1,37 +1,30 @@
-use std::fmt::Display;
-
-struct ImportantExcerpt<'a> {
+struct SomeThing<'a> {
     part: &'a str,
 }
 
-impl<'a> ImportantExcerpt<'a> {
-    fn level(&self) -> i32 {
-        3
+impl<'a> SomeThing<'a> {
+    fn new(part: &'a str) -> Self {
+        SomeThing { part }
+    }
+
+    fn show_something(&self) -> &str {
+        self.part
+    }
+    fn show_something_and_anohter(&self, another: &str) -> String {
+        format!("{} and {}", self.part, another)
     }
 }
 
 fn main() {
-    let novel = String::from("Call me xfy. Some years ago...");
-    let first_sentence = novel.split('.').next().expect("Could not find a '.'");
+    let my_something = SomeThing::new("xfy");
+    println!("{}", my_something.show_something());
 
-    let i = ImportantExcerpt {
-        part: first_sentence,
-    };
-
-    let s1 = String::from("hello");
-    let s2 = &s1;
-
-    println!("{}", longest_with_an_announcement(&s1[..], &s2[..], "Test"))
-}
-
-fn longest_with_an_announcement<'a, T>(x: &'a str, y: &'a str, an: T) -> &'a str
-where
-    T: Display,
-{
-    println!("Announcement! {}", an);
-    if x.len() > y.len() {
-        x
-    } else {
-        y
+    let s1;
+    {
+        let s2 = String::from("hello");
+        s1 = &s2;
+        println!("{}", my_something.show_something_and_anohter(&s1[..]));
     }
 }
+
+// I love Rust.
