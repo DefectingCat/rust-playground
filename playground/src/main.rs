@@ -1,19 +1,11 @@
-struct Person<'a> {
-    name: &'a str,
-}
-
-impl<'a> Person<'a> {
-    fn new(name: &'a str) -> Self {
-        Self { name }
-    }
-    fn say_hi(&self) {
-        println!("Hi, my name is {}.", self.name)
-    }
-}
-
 fn main() {
-    let me = Person::new("xfy");
+    let a = 2;
+    let b = 3;
+    println!("{}", closure_test()(a));
+    println!("{}", closure_test()(b));
+}
 
-    println!("Hello {}!", me.name);
-    me.say_hi();
+fn closure_test() -> impl Fn(i32) -> i32 {
+    let i = 42;
+    move |j| j + i
 }

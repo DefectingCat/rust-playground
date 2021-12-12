@@ -1,13 +1,34 @@
-pub fn add_two(a: i32) -> i32 {
-    a + 2
+pub struct Rectangle {
+    width: i32,
+    height: i32,
 }
 
-#[cfg(test)]
+impl Rectangle {
+    pub fn new(width: i32, height: i32) -> Self {
+        Self { width, height }
+    }
+
+    pub fn can_hold(&self, other: Self) -> bool {
+        self.width * self.height > other.width * other.height
+    }
+}
+
 mod tests {
-    use super::*;
+    use super::Rectangle;
 
     #[test]
-    fn it_add_two() {
-        assert_eq!(4, add_two(2))
+    fn hold_test() {
+        let larger = Rectangle::new(42, 42);
+        let samller = Rectangle::new(31, 31);
+
+        assert!(larger.can_hold(samller))
+    }
+
+    #[test]
+    fn failed_test() {
+        let larger = Rectangle::new(42, 42);
+        let samller = Rectangle::new(31, 31);
+
+        assert!(samller.can_hold(larger))
     }
 }
