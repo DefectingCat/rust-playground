@@ -1,34 +1,23 @@
-pub struct Rectangle {
-    width: i32,
-    height: i32,
+pub struct Guess {
+    value: i32,
 }
 
-impl Rectangle {
-    pub fn new(width: i32, height: i32) -> Self {
-        Self { width, height }
-    }
+impl Guess {
+    pub fn new(value: i32) -> Self {
+        if value < 1 || value > 100 {
+            panic!("Guess value must be between 1 and 100, got {}.", value)
+        }
 
-    pub fn can_hold(&self, other: Self) -> bool {
-        self.width * self.height > other.width * other.height
+        Self { value }
     }
 }
 
 mod tests {
-    use super::Rectangle;
+    use super::*;
 
     #[test]
-    fn hold_test() {
-        let larger = Rectangle::new(42, 42);
-        let samller = Rectangle::new(31, 31);
-
-        assert!(larger.can_hold(samller))
-    }
-
-    #[test]
-    fn failed_test() {
-        let larger = Rectangle::new(42, 42);
-        let samller = Rectangle::new(31, 31);
-
-        assert!(samller.can_hold(larger))
+    #[should_panic]
+    fn test() {
+        Guess::new(101);
     }
 }
