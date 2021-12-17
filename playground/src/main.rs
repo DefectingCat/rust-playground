@@ -1,8 +1,6 @@
 fn main() {
-    let a = 2;
-    let b = 3;
-    println!("{}", closure_test()(a));
-    println!("{}", closure_test()(b));
+    let arr = [1, 2, 3, 4];
+    let _: Vec<_> = arr.iter().map(|item| println!("{}", item + 1)).collect();
 }
 
 fn closure_test() -> impl Fn(i32) -> i32 {

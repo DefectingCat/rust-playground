@@ -7,14 +7,18 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(args: Vec<String>) -> Result<Self, &'static str> {
-        if args.len() < 3 {
-            return Err("Not enough arguments.");
-        }
+    pub fn new(mut args: std::env::Args) -> Result<Self, &'static str> {
+        args.next(); // Program path
 
         Ok(Self {
-            query: args[1].clone(),
-            filename: args[2].clone(),
+            query: match args.next() {
+                Some(arg) => arg,
+                None => return Err("Didn't get a query string"),
+            },
+            filename: match args.next() {
+                Some(arg) => arg,
+                None => return Err("Didn't get a file name"),
+            },
             case_sensitive: env::var("CASE_INSENSITIVE").is_err(),
         })
     }
@@ -23,42 +27,31 @@ impl Config {
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let content = fs::read_to_string(config.filename)?;
 
-    let results = if config.case_sensitive {
-        search(&config.query, &content)
+    if config.case_sensitive {
+        print_result(search(&config.query, &content));
     } else {
-        search_case_insensitive(&config.query, &content)
+        print_result(search_case_insensitive(&config.query, &content))
     };
-
-    for line in results {
-        println!("{}", line)
-    }
 
     Ok(())
 }
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut results = Vec::new();
-
-    for line in contents.lines() {
-        if line.contains(query) {
-            results.push(line)
-        }
-    }
-
-    results
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
 }
 
 pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let query = query.to_lowercase();
-    let mut results = Vec::new();
+    contents
+        .lines()
+        .filter(|line| line.to_lowercase().contains(&query.to_lowercase()))
+        .collect()
+}
 
-    for line in contents.lines() {
-        if line.to_lowercase().contains(&query) {
-            results.push(line)
-        }
-    }
-
-    results
+pub fn print_result(result: Vec<&str>) {
+    result.iter().map(|line| println!("{}", line)).collect()
 }
 
 #[cfg(test)]
