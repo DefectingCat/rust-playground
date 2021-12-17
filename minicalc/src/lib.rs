@@ -13,7 +13,7 @@ impl Config {
 
         let num1 = match args.next() {
             Some(arg) => arg.trim().parse().unwrap_or_else(|err| {
-                println!("{}", err);
+                eprintln!("{}", err);
                 process::exit(1)
             }),
             None => return Err("Didn't get the num1"),
@@ -26,7 +26,7 @@ impl Config {
 
         let num2 = match args.next() {
             Some(arg) => arg.trim().parse().unwrap_or_else(|err| {
-                println!("{}", err);
+                eprintln!("{}", err);
                 process::exit(1)
             }),
             None => return Err("Didn't get the num2"),
