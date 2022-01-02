@@ -1,4 +1,9 @@
 fn main() {
-    let v = vec![1, 2, 3, 4];
-    let _: Vec<_> = v.into_iter().filter(|x| x > &2).collect();
+    let mut counter = 1;
+
+    for _ in 0..10 {
+        counter *= 2;
+    }
+
+    println!("The counter is {}", counter);
 }
