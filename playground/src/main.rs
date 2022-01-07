@@ -1,8 +1,9 @@
 fn main() {
-    let list_of_nums = vec![1, 2, 3, 4, 5];
-    let num_to_string = |i: &i32| i.to_string();
+    let mut s = String::new();
 
-    let list_of_str: Vec<_> = list_of_nums.iter().map(num_to_string).collect();
+    let mut add_one = || s.push_str("string");
 
-    println!("{:?}", list_of_str);
+    add_one();
+
+    println!("s: {}", s)
 }
