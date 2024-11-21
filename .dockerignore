@@ -1,0 +1,6 @@
+ui/frontend/node_modules
+ui/frontend/build
+ui/**/*/target
+compiler/**/*/target
+**/*/target
+**/*/node_modules
