@@ -42,14 +42,14 @@ interface State {
 const initialState: State = {
   editor: Editor.Ace,
   ace: {
-    keybinding: 'ace',
-    theme: 'github',
+    keybinding: 'vim',
+    theme: 'github_dark',
     pairCharacters: PairCharacters.Enabled,
   },
   monaco: {
     theme: 'vs',
   },
-  theme: Theme.System,
+  theme: Theme.Dark,
   orientation: Orientation.Automatic,
   assemblyFlavor: AssemblyFlavor.Att,
   demangleAssembly: DemangleAssembly.Demangle,
@@ -57,7 +57,7 @@ const initialState: State = {
   primaryAction: PrimaryActionAuto.Auto,
   channel: Channel.Stable,
   mode: Mode.Debug,
-  edition: Edition.Rust2021,
+  edition: Edition.Rust2024,
   backtrace: Backtrace.Disabled,
 };
 

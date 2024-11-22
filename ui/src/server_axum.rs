@@ -32,6 +32,7 @@ use orchestrator::coordinator::{
 use snafu::prelude::*;
 use std::{
     convert::TryInto,
+    fmt::Display,
     future::Future,
     mem, path,
     str::FromStr,
@@ -46,7 +47,11 @@ use tower_http::{
     set_header::SetResponseHeader,
     trace::TraceLayer,
 };
-use tracing::{error, error_span, field};
+use tracing::error;
+
+use axum::{body::Bytes, http::HeaderMap, response::Response};
+use tower_http::classify::ServerErrorsFailureClass;
+use tracing::{info, info_span, Span};
 
 use crate::{env::PLAYGROUND_GITHUB_TOKEN, public_http_api as api};
 
@@ -129,29 +134,29 @@ pub(crate) async fn serve(config: Config) {
         });
     }
 
-    let x_request_id = HeaderName::from_static("x-request-id");
+    // let x_request_id = HeaderName::from_static("x-request-id");
 
     // Basic access logging
-    app = app.layer(
-        TraceLayer::new_for_http().make_span_with(move |req: &Request<_>| {
-            const REQUEST_ID: &str = "request_id";
-
-            let method = req.method();
-            let uri = req.uri();
-            let request_id = req
-                .headers()
-                .get(&x_request_id)
-                .and_then(|id| id.to_str().ok());
-
-            let span = error_span!("request", %method, %uri, { REQUEST_ID } = field::Empty);
-
-            if let Some(request_id) = request_id {
-                span.record(REQUEST_ID, field::display(request_id));
-            }
-
-            span
-        }),
-    );
+    // app = app.layer(
+    //     TraceLayer::new_for_http().make_span_with(move |req: &Request<_>| {
+    //         const REQUEST_ID: &str = "request_id";
+    //
+    //         let method = req.method();
+    //         let uri = req.uri();
+    //         let request_id = req
+    //             .headers()
+    //             .get(&x_request_id)
+    //             .and_then(|id| id.to_str().ok());
+    //
+    //         let span = error_span!("request", %method, %uri, { REQUEST_ID } = field::Empty);
+    //
+    //         if let Some(request_id) = request_id {
+    //             span.record(REQUEST_ID, field::display(request_id));
+    //         }
+    //
+    //         span
+    //     }),
+    // );
 
     let x_request_id = HeaderName::from_static("x-request-id");
 
@@ -162,6 +167,8 @@ pub(crate) async fn serve(config: Config) {
         x_request_id.clone(),
         MakeRequestUuid::default(),
     ));
+
+    app = logging_route(app);
 
     let server_socket_addr = config.server_socket_addr();
     tracing::info!("Serving playground backend at http://{server_socket_addr}");
@@ -175,6 +182,53 @@ pub(crate) async fn serve(config: Config) {
     select! {
         v = server => v.unwrap(),
         v = db_task => v.unwrap(),
+    }
+}
+
+/// Middleware for logging each request.
+///
+/// This middleware will calculate each request latency
+/// and add request's information to each info_span.
+pub fn logging_route(router: Router) -> Router {
+    let make_span = |req: &Request<_>| {
+        let unknown = &HeaderValue::from_static("Unknown");
+        let empty = &HeaderValue::from_static("");
+        let headers = req.headers();
+        let ua = headers
+            .get("User-Agent")
+            .unwrap_or(unknown)
+            .to_str()
+            .unwrap_or("Unknown");
+        let host = headers.get("Host").unwrap_or(empty).to_str().unwrap_or("");
+        info_span!("HTTP", method = ?req.method(), host, uri = ?req.uri(), ua)
+    };
+
+    let trace_layer = TraceLayer::new_for_http()
+        .make_span_with(make_span)
+        .on_request(|_req: &Request<_>, _span: &Span| {})
+        .on_response(|res: &Response, latency: Duration, _span: &Span| {
+            info!("{}", format_latency(latency, res.status()));
+        })
+        .on_body_chunk(|_chunk: &Bytes, _latency: Duration, _span: &Span| {})
+        .on_eos(|_trailers: Option<&HeaderMap>, _stream_duration: Duration, _span: &Span| {})
+        .on_failure(
+            |error: ServerErrorsFailureClass, latency: Duration, _span: &Span| {
+                error!("{}", format_latency(latency, error));
+            },
+        );
+
+    router.layer(trace_layer)
+}
+
+/// Format request latency and status message
+/// return a string
+fn format_latency(latency: Duration, status: impl Display) -> String {
+    let micros = latency.as_micros();
+    let millis = latency.as_millis();
+    if micros >= 1000 {
+        format!("{} {}ms", status, millis)
+    } else {
+        format!("{} {}μs", status, micros)
     }
 }
 

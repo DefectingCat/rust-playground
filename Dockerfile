@@ -13,8 +13,8 @@ pwd
 npm i -g pnpm
 pnpm install --frozen-lockfile
 pnpm build
-mkdir -p /bin/ui/build
-cp -r build/ /bin/ui/build/
+mkdir -p /bin/ui/
+cp -r build/ /bin/ui/
 EOF
 
 FROM rust:${RUST_VERSION}-slim-bullseye AS build

@@ -11,9 +11,9 @@ use std::{
     time::Duration,
 };
 use tracing::{error, info, warn};
-use tracing_subscriber::EnvFilter;
+use tracing_subscriber::{fmt, prelude::*, registry, EnvFilter};
 
-const DEFAULT_ADDRESS: &str = "127.0.0.1";
+const DEFAULT_ADDRESS: &str = "0.0.0.0";
 const DEFAULT_PORT: u16 = 5000;
 
 const DEFAULT_WEBSOCKET_IDLE_TIMEOUT: Duration = Duration::from_secs(60);
@@ -37,12 +37,26 @@ fn main() {
     openssl_probe::init_ssl_cert_env_vars();
 
     // Info-level logging is enabled by default.
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env())
-        .init();
+    // tracing_subscriber::fmt()
+    //     .with_env_filter(EnvFilter::from_default_env())
+    //     .init();
+    init_logger();
 
     let config = Config::from_env();
     server_axum::serve(config);
+}
+
+/// Initializes the logger for tracing.
+pub fn init_logger() {
+    let formatting_layer = fmt::layer()
+        // .pretty()
+        .with_thread_ids(false)
+        .with_target(false)
+        .with_writer(std::io::stdout);
+
+    let env_layer = EnvFilter::try_from_env("axum").unwrap_or_else(|_| "info".into());
+
+    registry().with(env_layer).with(formatting_layer).init();
 }
 
 #[derive(Copy, Clone)]
