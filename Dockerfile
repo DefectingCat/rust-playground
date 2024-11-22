@@ -26,24 +26,13 @@ RUN --mount=type=cache,target=/app/target/ \
   <<EOF
 set -e
 cd ui
-cargo build --locked --release
-cp ./target/release/ui /bin/server
+apt-get update && apt-get install -y musl musl-tools libssl-dev
+rustup target add x86_64-unknown-linux-musl
+cargo build --locked --release --target x86_64-unknown-linux-musl
+cp target/x86_64-unknown-linux-musl/release/ui /bin/server
 EOF
 
-FROM debian:bullseye-slim AS final
-
-# Create a non-privileged user that the app will run under.
-# See https://docs.docker.com/develop/develop-images/dockerfile_best-practices/   #user
-ARG UID=10001
-RUN adduser \
-  --disabled-password \
-  --gecos "" \
-  --home "/nonexistent" \
-  --shell "/sbin/nologin" \
-  --no-create-home \
-  --uid "${UID}" \
-  appuser
-USER appuser
+FROM docker AS final
 
 ENV PLAYGROUND_UI_ROOT=/bin/ui/build
 
